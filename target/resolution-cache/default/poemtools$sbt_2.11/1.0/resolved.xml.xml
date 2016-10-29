@@ -4,7 +4,7 @@
 		module="poemtools$sbt_2.11"
 		revision="1.0"
 		status="integration"
-		publication="20161029102304"
+		publication="20161029104003"
 	/>
 	<configurations>
 		<conf name="default" visibility="public"/>
