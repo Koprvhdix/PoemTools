@@ -3,11 +3,13 @@ from scrapy.spider import Spider
 import scrapy
 
 
-class SpiderTangPoetry(Spider):
-    name = "spider_tang_poetry"
+class SpiderGushiwenOrg(Spider):
+    name = "spider_gushiwen_org"
     allowed_domains = ["www.diyifanwen.com"]
     start_urls = [
-        "http://www.diyifanwen.com/sicijianshang/tangshisanbaishou/"
+        "http://www.gushiwen.org/gushi/tangshi.aspx",
+        "http://www.gushiwen.org/gushi/songsan.aspx",
+        ""
     ]
 
     def parse(self, response):
