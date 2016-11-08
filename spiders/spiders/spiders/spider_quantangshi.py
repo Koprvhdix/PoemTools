@@ -1,6 +1,7 @@
 # coding: utf-8
 from scrapy.spider import Spider
 import scrapy
+import os
 
 
 class SpiderQuanTangPoem(Spider):
@@ -25,8 +26,29 @@ class SpiderQuanTangPoem(Spider):
             yield scrapy.Request(url, callback=self.parse_poem_list, dont_filter=True)
 
     def parse_poem_list(self, response):
-        # file_name = "poem/" + response.url.split("/")[-1].split(".")[0]
-        # file_open = open(file_name, 'wb')
+	"""
+	    get the poem url list
+	"""
+	poem_url_list = list()
         for sel in response.xpath('//span'):
             # file_open.writelines(sel.encode('utf-8'))
 	    link = sel.xpath('a/@href').extract()
+	    poem_url_list.append(link[0])
+	
+	for url in poem_url_list:
+	    yield scrapy.Request(url, callback=self.parse_poem, dont_filter=True)
+
+    def parse_poem(self, response):
+	"""
+	    get the poem
+	"""
+	chapter_poem = response.url.split("/")[-1].split("?")[1].split("&")
+	folder_name = "/home/wukai/IdeaProjects/PoemTools/poem/" + chapter_poem[0].split("=")[1]
+	if not os.path.exists(folder_name):
+	    os.makedirs(folder_name)
+	file_name = folder_name + "/" + chapter_poem[1].split("=")[1]
+	file_open = open(file_name , 'wb')
+	text_set = response.xpath('//font/text()').extract()
+	for text in text_set:
+	    file_open.writelines(text.encode('utf-8'))
+	    
