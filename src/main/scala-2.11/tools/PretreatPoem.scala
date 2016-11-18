@@ -15,9 +15,25 @@ object PretreatPoem {
       for (file <- new File(chapter.toString).listFiles()) {
         for (line <- Source.fromFile(file).getLines()) {
           if (!line.isEmpty) {
-
+            val start = line.indexOf("首") + 1
+            if (start != 18) {
+              println("ERROR Start")
+              println(line)
+            }
+            val end = line.indexOf("作者：张子蛟") - 1
+            val lengOfLine = line.length
+            if (lengOfLine - end != 39) {
+              println("ERROR End")
+              println(line)
+            }
+            var poemBuffer = new StringBuffer()
+            for (i <- start to end) {
+              poemBuffer += line(i).toString
+            }
+            println(poemBuffer.toString)
           }
         }
+        return
       }
     }
   }
