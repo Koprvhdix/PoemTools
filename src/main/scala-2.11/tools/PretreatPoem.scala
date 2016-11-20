@@ -1,6 +1,6 @@
 import scala.io.Source
 import scala.reflect.io.Directory
-import java.io.File
+import java.io.{File, PrintWriter}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -13,6 +13,7 @@ object PretreatPoem {
     val folder = "poem"
     for (chapter <- new File(folder).listFiles()) {
       for (file <- new File(chapter.toString).listFiles()) {
+        println(file)
         for (line <- Source.fromFile(file).getLines()) {
           if (!line.isEmpty) {
             val start = line.indexOf("首") + 1
@@ -26,14 +27,16 @@ object PretreatPoem {
               println("ERROR End")
               println(line)
             }
-            var poemBuffer = new StringBuffer()
+            val poemBuffer = new StringBuffer()
             for (i <- start to end) {
-              poemBuffer += line(i).toString
+              poemBuffer.append(line(i).toString)
             }
-            println(poemBuffer.toString)
+
+            val outputFile = new PrintWriter(file)
+            outputFile.println(poemBuffer.toString)
+            outputFile.close()
           }
         }
-        return
       }
     }
   }
