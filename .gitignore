@@ -1,5 +1,5 @@
-/target
-/project
+*/target
+*/project
 /poem
-/.idea
+*/.idea
 *.pyc

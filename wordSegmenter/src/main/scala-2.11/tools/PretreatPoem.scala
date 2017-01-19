@@ -1,8 +1,5 @@
 import scala.io.Source
-import scala.reflect.io.Directory
 import java.io.{File, PrintWriter}
-
-import scala.collection.mutable.ArrayBuffer
 
 /**
   * Created by wukai on 16-11-13.
