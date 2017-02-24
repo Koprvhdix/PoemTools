@@ -30,7 +30,6 @@ class SpiderQuanTangPoem(Spider):
             get the poem url list
         """
         poem_url_list = list()
-        for sel in response.xpath('')
 
         for sel in response.xpath('//span'):
             # file_open.writelines(sel.encode('utf-8'))
