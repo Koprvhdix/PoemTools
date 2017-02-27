@@ -7,7 +7,7 @@ import java.io.{File, PrintWriter}
   */
 object ProcessPoem {
   def processTangPoem(): Unit = {
-    val folder = "/home/wukai/Projects/PoemTools/poem"
+    val folder = "/Users/koprvhdix/Projects/PoemTools/poem"
 
     /*
       process chapter. Tangs Poem has 900 chapters.
