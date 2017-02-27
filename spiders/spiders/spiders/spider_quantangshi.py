@@ -1,7 +1,7 @@
 # coding: utf-8
 from scrapy.spider import Spider
 import scrapy
-from scrapy import log
+import logging
 import os
 
 
@@ -23,8 +23,8 @@ class SpiderQuanTangPoem(Spider):
             link = sel.xpath('a/@href').extract()
             chapter_url_list.append(link[0])
         # get the poem url list
-        # for url in chapter_url_list:
-        yield scrapy.Request(chapter_url_list[0], callback=self.parse_poem_list, dont_filter=True)
+        for url in chapter_url_list:
+            yield scrapy.Request(url, callback=self.parse_poem_list, dont_filter=True)
 
     def parse_poem_list(self, response):
         """
@@ -32,9 +32,12 @@ class SpiderQuanTangPoem(Spider):
         """
         poem_url_list = list()
 
-        for sel in response.xpath('/html/body/div[1]/center/table/tbody/tr[2]/td[2]/p'):
-            link = sel.xpath('a/@href').extract()
-            yield scrapy.Request(link[0], callback=self.parse_poem_list, dont_filter=True)
+        for sel in response.xpath('/html/body/div[1]/center/table/tr[2]/td[2]/p/a'):
+            text = sel.xpath('text()').extract()
+            if text[0] == u'下页':
+                logging.info("yes")
+                link = sel.xpath('@href').extract()
+                yield scrapy.Request(link[0], callback=self.parse_poem_list, dont_filter=True)
 
         for sel in response.xpath('//span'):
             # file_open.writelines(sel.encode('utf-8'))
