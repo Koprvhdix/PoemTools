@@ -1,5 +1,6 @@
 # coding：utf-8
 import os
+import json
 
 
 class poems(object):
@@ -15,6 +16,8 @@ class poems(object):
                 file_open = open(chapter_path + '/' + poem)
                 poem_text = file_open.readlines()
 
+                title_end_index = poem_text[0].find('\xa0')
+                poem_text[0] = poem_text[0][title_end_index:]
                 poem_text[0] = poem_text[0].replace('\xa0', '')
                 poem_text[0] = poem_text[0].replace('\n', '')
 
@@ -23,7 +26,7 @@ class poems(object):
 
     def write_poem_vector(self, poem_vector_list):
         file_open = open(self.output_path, 'w')
-        file_open.writelines(poem_vector_list)
+        file_open.writelines(json.dumps(poem_vector_list))
 
 
 # test
