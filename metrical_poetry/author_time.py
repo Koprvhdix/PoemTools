@@ -1,6 +1,5 @@
 # coding: utf-8
 import requests
-import re
 
 author_set = ['李世民', '李治', '李隆基', '李亨', '武则天', '李贤', '鲍君徽', '南唐诸人', '徐氏', '王珪', '魏徵', '褚亮', '刘孝孙', '杨师道', '许敬宗', '虞世南',
               '王绩', '郑世翼', '陈子良', '上官仪', '卢照邻', '李百药', '刘祎之', '陈元光', '韦承庆', '张九龄', '杨炯', '宋之问', '崔湜', '王勃', '李峤', '杜审言',
@@ -51,4 +50,4 @@ for item in author_set:
         if index2 - index1 < 100 and content[index1: index2 + 1] != '（未上线）':
             file_open.writelines(content[index1: index2 + 1] + '\n')
 
-
+# 然后人工处理

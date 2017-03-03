@@ -6,8 +6,9 @@ class MetricalPoetry(object):
         self.poetry = poetry
         # 一句诗的字数，必须是5或者7
         self.key_char_number = 0
+        self.poetry_type = -1
         self.is_metrical_poetry = self.recognize()
-        self.segmenter_list = self.segmenter()
+        # self.segmenter_list = self.segmenter()
 
     def recognize(self):
         char_number = 0
@@ -45,6 +46,16 @@ class MetricalPoetry(object):
 
         if sentence_number != 2 and sentence_number != 4:
             return False
+        if sentence_number == 2:
+            if self.key_char_number == 5:
+                self.poetry_type = 0
+            else:
+                self.poetry_type = 1
+        else:
+            if self.key_char_number == 5:
+                self.poetry_type = 2
+            else:
+                self.poetry_type = 3
         return True
 
     def segmenter(self):
