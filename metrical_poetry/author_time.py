@@ -1,5 +1,6 @@
 # coding: utf-8
 import requests
+import re
 
 author_set = ['李世民', '李治', '李隆基', '李亨', '武则天', '李贤', '鲍君徽', '南唐诸人', '徐氏', '王珪', '魏徵', '褚亮', '刘孝孙', '杨师道', '许敬宗', '虞世南',
               '王绩', '郑世翼', '陈子良', '上官仪', '卢照邻', '李百药', '刘祎之', '陈元光', '韦承庆', '张九龄', '杨炯', '宋之问', '崔湜', '王勃', '李峤', '杜审言',
@@ -28,3 +29,26 @@ author_set = ['李世民', '李治', '李隆基', '李亨', '武则天', '李贤
               '郑蕡', '赵铎', '员南溟', '辛学士', '花蕊夫人', '杨容华', '柳氏', '郎大家宋氏', '关盼盼', '薛涛', '鱼玄机', '李冶', '寒山', '拾得', '慧宣', '灵一',
               '灵澈', '护国', '清江', '无可', '皎然', '广宣', '含曦', '子兰', '可止', '贯休', '齐己', '尚颜', '可朋', '昙翼', '司马承祯', '吴筠',
               '杜光庭', '郑遨', '吕岩', '孙思邈', '马湘', '清远道士', '张云容', '慕容垂', '李渊', '高亭', '甘洽', '李兼', '李瀚', '卢言']
+
+url_str = 'http://www.baidu.com/s?ie=utf-8&fr=bks0000&wd='
+
+file_path = '/Users/koprvhdix/Projects/PoemTools/author_time'
+file_open = open(file_path, 'w')
+
+for item in author_set:
+    content = requests.get(url=url_str + item).text
+    index1 = 0
+    file_open.writelines(item + '\n')
+    while True:
+        index1 = content.find('（', index1 + 1)
+        index2 = content.find('）', index1 + 1)
+
+        print(str(index1) + '\t' + str(index2))
+
+        if index2 == -1 or index1 == -1:
+            break
+
+        if index2 - index1 < 100 and content[index1: index2 + 1] != '（未上线）':
+            file_open.writelines(content[index1: index2 + 1] + '\n')
+
+
