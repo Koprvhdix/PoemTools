@@ -13,7 +13,8 @@ def get_char_set():
     """
     poem_path = '/Users/koprvhdix/Projects/PoemTools/poem'
 
-    char_set = list()
+    char_set = dict()
+    mark_number = np.zeros(8192)
 
     for chapter in os.listdir(poem_path):
         chapter_path = poem_path + '/' + chapter
@@ -32,7 +33,20 @@ def get_char_set():
                 poetry_char = list(poem_text[0])
                 for item in poetry_char:
                     if item not in char_set:
-                        char_set.append(item)
+                        has_number = False
+                        for i in range(10):
+                            index = random.randint(0, 8191)
+                            if mark_number[index] == 0:
+                                char_set[item] = index
+                                mark_number[index] = 1
+                                has_number = True
+                                break
+                        if not has_number:
+                            for i in range(8192):
+                                if mark_number[i] == 0:
+                                    char_set[item] = i
+                                    mark_number[i] = 1
+                                    break
     return char_set
 
 
@@ -63,6 +77,7 @@ def train_test(poetry_type):
             poem_text[0] = poem_text[0].replace('\xa0', '')
             poem_text[0] = poem_text[0].replace('\n', '')
 
+            # 处理奇怪的诗
             if len(poem_text[0]) == 0:
                 continue
             elif poem_text[0][-1] != '。':
@@ -77,22 +92,46 @@ def train_test(poetry_type):
             if poetry.is_metrical_poetry and poetry_type == poetry.poetry_type:
                 is_train = random.randint(0, 100)
 
+                poem_text[0] = poem_text[0].replace('，', '')
+                poem_text[0] = poem_text[0].replace('。', '')
+
                 # 构造稀疏矩阵
                 poetry_char_matrix = list()
                 for item in poem_text[0]:
-                    one_char = np.zeros((len(dict_char_set)))
-                    one_char[dict_char_set.index(item)] = 1
-                    poetry_char_matrix.append(one_char)
+                    number = dict_char_set[item]
+                    number = bin(number).replace('0b', '')
+                    if len(number) < 13:
+                        number = '0' * (13 - len(number)) + number
+                    poetry_char_matrix.append(list(number))
 
-                if len(poem_text[0]) != 32:
-                    print(poem_text[0])
-
-                if is_train > 33:
+                if is_train > 10:
                     train_poetry.append(poetry_char_matrix)
                     train_label.append(time_mark_dict[author_time_dict[author]])
                 else:
                     test_poetry.append(poetry_char_matrix)
                     test_label.append(time_mark_dict[author_time_dict[author]])
+    for random_time in range(len(train_poetry)):
+        index1 = random.randint(0, len(train_poetry) - 1)
+        index2 = random.randint(0, len(train_poetry) - 1)
+
+        poetry = train_poetry[index1]
+        train_poetry[index1] = train_poetry[index2]
+        train_poetry[index2] = poetry
+
+        label = train_label[index1]
+        train_label[index1] = train_label[index2]
+        train_label[index2] = label
+    for random_time in range(len(test_poetry)):
+        index1 = random.randint(0, len(test_poetry) - 1)
+        index2 = random.randint(0, len(test_poetry) - 1)
+
+        poetry = test_poetry[index1]
+        test_poetry[index1] = test_poetry[index2]
+        test_poetry[index2] = poetry
+
+        label = test_label[index1]
+        test_label[index1] = test_label[index2]
+        test_label[index2] = label
     return train_poetry, train_label, test_poetry, test_label
 
 
@@ -125,7 +164,5 @@ def not_recognize():
 
 if __name__ == '__main__':
     train_poetry, train_label, test_poetry, test_label = train_test(1)
-    print(len(train_poetry))
     print(len(train_label))
     print(len(test_poetry))
-    print(len(test_label))

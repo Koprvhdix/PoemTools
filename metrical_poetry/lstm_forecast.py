@@ -9,14 +9,12 @@ class LSTM(object):
         self.poetry_type = poetry_type
         self.train_poetry, self.train_label, self.test_poetry, self.test_label = data_set.train_test(self.poetry_type)
 
-        self.train_poetry = self.train_poetry[:6500]
-        self.train_label = self.train_label[:6500]
-
         self.n_classes = 4  # 输出的维度
-        self.n_hidden = 2  # 一次训练多少组数据，也就是多少个cell
-        self.n_step = [24, 32, 48, 64]  # 一首诗的长度
+        self.n_hidden = 128  # 一次训练多少组数据，也就是多少个cell
+        self.n_step = [20, 28, 40, 56]  # 一首诗的长度
         self.learning_rate = 0.001
-        self.n_input = 5772
+        self.n_input = 13
+        self.batch_size = 32
 
         self.weights = {
             'out': tf.Variable(tf.random_normal([self.n_hidden, self.n_classes]))
@@ -54,22 +52,27 @@ class LSTM(object):
         # Launch the graph
         with tf.Session() as sess:
             sess.run(init)
-            for i in range(3250):
+            for i in range(int(len(self.train_poetry) / self.batch_size) - 1):
                 sess.run(optimizer,
-                         feed_dict={x: self.train_poetry[i:(i + 1) * 2], y: self.train_label[i:(i + 1) * 2]})
-                if i % 50 == 0:
-                    acc = sess.run(accuracy, feed_dict={x: self.train_poetry[i:(i + 1) * 2],
-                                                        y: self.train_label[i:(i + 1) * 2]})
-                    loss = sess.run(cost, feed_dict={x: self.train_poetry[i:(i + 1) * 2],
-                                                     y: self.train_label[i:(i + 1) * 2]})
+                         feed_dict={x: self.train_poetry[i * self.batch_size:(i + 1) * self.batch_size],
+                                    y: self.train_label[i * self.batch_size:(i + 1) * self.batch_size]})
+                if i % 2 == 0:
+                    acc = sess.run(accuracy,
+                                   feed_dict={x: self.train_poetry[i * self.batch_size:(i + 1) * self.batch_size],
+                                              y: self.train_label[i * self.batch_size:(i + 1) * self.batch_size]})
+                    loss = sess.run(cost,
+                                    feed_dict={x: self.train_poetry[i * self.batch_size:(i + 1) * self.batch_size],
+                                               y: self.train_label[i * self.batch_size:(i + 1) * self.batch_size]})
                     print("Iter " + str(i) +
                           " \nacc: " + "{:.6f}".format(acc) +
                           " \nloss: " + "{:.5f}".format(loss))
-
-            print("Testing Accuracy:", sess.run(accuracy, feed_dict={x: self.test_poetry[:5], y: self.test_label[:5]}))
+            for i in range(int(len(self.test_poetry) / self.batch_size) - 1):
+                print("Testing Accuracy:",
+                      sess.run(accuracy, feed_dict={x: self.test_poetry[i * self.batch_size:(i + 1) * self.batch_size],
+                                                    y: self.test_label[i * self.batch_size:(i + 1) * self.batch_size]}))
 
 
 if __name__ == '__main__':
-    my_test = LSTM(1)
+    my_test = LSTM(3)
     print("start")
     my_test.run_test()
