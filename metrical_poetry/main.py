@@ -48,5 +48,6 @@ if __name__ == '__main__':
     sentences_list = segment(poetry_list)
 
     model = word2vec.Word2Vec(sentences_list, size=200)
+    word2vec.Word2Vec.load()
     y1 = model.similarity("今日", "明月")
     print(model["今日"])

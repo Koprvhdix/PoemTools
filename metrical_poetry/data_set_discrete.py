@@ -160,9 +160,3 @@ def not_recognize():
             if poetry.is_metrical_poetry:
                 poetry_not_recognize.append(poem_text[0])
     return poetry_not_recognize
-
-
-if __name__ == '__main__':
-    train_poetry, train_label, test_poetry, test_label = train_test(1)
-    print(len(train_label))
-    print(len(test_poetry))

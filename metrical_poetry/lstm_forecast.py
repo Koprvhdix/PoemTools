@@ -1,5 +1,5 @@
 # coding: utf-8
-import data_set
+import data_set_word2vec
 import tensorflow as tf
 from tensorflow.contrib import rnn
 
@@ -7,13 +7,14 @@ from tensorflow.contrib import rnn
 class LSTM(object):
     def __init__(self, poetry_type):
         self.poetry_type = poetry_type
-        self.train_poetry, self.train_label, self.test_poetry, self.test_label = data_set.train_test(self.poetry_type)
+        self.train_poetry, self.train_label, self.test_poetry, self.test_label = data_set_word2vec.train_test_set(
+            self.poetry_type)
 
         self.n_classes = 4  # 输出的维度
         self.n_hidden = 128  # 一次训练多少组数据，也就是多少个cell
-        self.n_step = [20, 28, 40, 56]  # 一首诗的长度
+        self.n_step = [12, 16, 24, 32]  # 一首诗的长度
         self.learning_rate = 0.001
-        self.n_input = 13
+        self.n_input = 200
         self.batch_size = 32
 
         self.weights = {

@@ -42,6 +42,8 @@ def segment(metrical_poetry):
     sentence_list = list()
     for poetry in metrical_poetry:
         sentence = list()
+
+        # 其实可以不用判断是否为格律诗
         if not poetry.is_metrical_poetry:
             continue
         if poetry.key_char_number == 5:
