@@ -1,6 +1,9 @@
-# coding: utf-8
+"""
+create on 17-03-14
+@author: Koprvhdix
+"""
 
-from loadPingShuiYun import LoadPingShuiYun
+from load_PingShuiYun import LoadPingShuiYun
 
 
 if __name__ == '__main__':

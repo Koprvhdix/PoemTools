@@ -1,7 +1,8 @@
 # coding: utf-8
-import data_set_word2vec
 import tensorflow as tf
 from tensorflow.contrib import rnn
+
+import data_set_word2vec
 
 
 class LSTM(object):
