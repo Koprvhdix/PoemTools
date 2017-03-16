@@ -148,7 +148,7 @@ def not_recognize():
             continue
 
         for poem in os.listdir(chapter_path):
-            file_open = open(chapter_path + '/' + poem)
+            file_open = open(chapter_path + '/' + poem, "r", encoding="utf-8")
             poem_text = file_open.readlines()
 
             title_end_index = poem_text[0].find('\xa0')

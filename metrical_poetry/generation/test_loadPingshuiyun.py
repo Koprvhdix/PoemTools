@@ -3,7 +3,7 @@ create on 17-03-14
 @author: Koprvhdix
 """
 
-from load_PingShuiYun import LoadPingShuiYun
+from generation.load_PingShuiYun import LoadPingShuiYun
 
 
 if __name__ == '__main__':

@@ -12,7 +12,7 @@ class LSTM(object):
             self.poetry_type)
 
         self.n_classes = 4  # 输出的维度
-        self.n_hidden = 128  # 一次训练多少组数据，也就是多少个cell
+        self.n_hidden = 350  # 一次训练多少组数据，也就是多少个cell
         self.n_step = [12, 16, 24, 32]  # 一首诗的长度
         self.learning_rate = 0.001
         self.n_input = 200
@@ -31,7 +31,7 @@ class LSTM(object):
         x = tf.split(x, self.n_step[self.poetry_type], 0)
 
         # 构建一个cell，暂时是照抄example
-        lstm_cell = rnn.LSTMBlockCell(self.n_hidden, forget_bias=1.0)
+        lstm_cell = rnn.LSTMCell(self.n_hidden, forget_bias=1.0, use_peepholes=True)
         outputs, states = rnn.static_rnn(lstm_cell, x, dtype=tf.float32)
         # matmul的功能是 output * weight + b
         return tf.matmul(outputs[-1], self.weights['out']) + self.biases['out']
@@ -59,6 +59,10 @@ class LSTM(object):
                          feed_dict={x: self.train_poetry[i * self.batch_size:(i + 1) * self.batch_size],
                                     y: self.train_label[i * self.batch_size:(i + 1) * self.batch_size]})
                 if i % 2 == 0:
+                    print(sess.run(tf.argmax(pred, 1),
+                                   feed_dict={x: self.train_poetry[i * self.batch_size:(i + 1) * self.batch_size]}))
+                    print(sess.run(tf.argmax(y, 1),
+                                   feed_dict={y: self.train_label[i * self.batch_size:(i + 1) * self.batch_size]}))
                     acc = sess.run(accuracy,
                                    feed_dict={x: self.train_poetry[i * self.batch_size:(i + 1) * self.batch_size],
                                               y: self.train_label[i * self.batch_size:(i + 1) * self.batch_size]})
@@ -72,6 +76,10 @@ class LSTM(object):
                 print("Testing Accuracy:",
                       sess.run(accuracy, feed_dict={x: self.test_poetry[i * self.batch_size:(i + 1) * self.batch_size],
                                                     y: self.test_label[i * self.batch_size:(i + 1) * self.batch_size]}))
+                print(sess.run(tf.argmax(pred, 1),
+                               feed_dict={x: self.test_poetry[i * self.batch_size:(i + 1) * self.batch_size]}))
+                print(sess.run(tf.argmax(y, 1),
+                               feed_dict={y: self.test_label[i * self.batch_size:(i + 1) * self.batch_size]}))
 
 
 if __name__ == '__main__':

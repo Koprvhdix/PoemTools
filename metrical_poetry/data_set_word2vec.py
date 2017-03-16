@@ -9,7 +9,7 @@ import random
 
 
 def train_test_set(poetry_type):
-    poem_path = '/Users/koprvhdix/Projects/PoemTools/poem'
+    poem_path = '/Users/koprvhdix/Projects/graduation_project/PoemTools/poem'
     poetry_list = list()
     label_list = list()
 
@@ -22,7 +22,7 @@ def train_test_set(poetry_type):
             continue
 
         for poem in os.listdir(chapter_path):
-            file_open = open(chapter_path + '/' + poem)
+            file_open = open(chapter_path + '/' + poem, encoding="utf-8")
             poem_text = file_open.readlines()
 
             title_end_index = poem_text[0].find('\xa0')
@@ -43,8 +43,20 @@ def train_test_set(poetry_type):
 
             poetry = MetricalPoetry(poem_text[0])
             if poetry.is_metrical_poetry and poetry_type == poetry.poetry_type:
-                poetry_list.append(poetry)
-                label_list.append(time_mark_dict[author_time_dict[author]])
+                label = time_mark_dict[author_time_dict[author]]
+                # reduce number of poetry
+                is_select = True
+                if label[1] != 0:
+                    is_select_random = random.randint(0, 100)
+                    if is_select_random > 33:
+                        is_select = False
+                if label[3] != 0:
+                    is_select_random = random.randint(0, 100)
+                    if is_select_random > 10:
+                        is_select = False
+                if is_select:
+                    poetry_list.append(poetry)
+                    label_list.append(label)
 
     sentences_list = segment(poetry_list)
 
@@ -69,7 +81,7 @@ def train_test_set(poetry_type):
             test_poetry.append(poetry_word_2_vec)
             test_label.append(label_list[i])
 
-    for random_time in range(len(train_poetry)):
+    for random_time in range(len(train_poetry) * len(train_poetry)):
         index1 = random.randint(0, len(train_poetry) - 1)
         index2 = random.randint(0, len(train_poetry) - 1)
 
@@ -80,7 +92,7 @@ def train_test_set(poetry_type):
         label = train_label[index1]
         train_label[index1] = train_label[index2]
         train_label[index2] = label
-    for random_time in range(len(test_poetry)):
+    for random_time in range(len(test_poetry) * len(test_poetry)):
         index1 = random.randint(0, len(test_poetry) - 1)
         index2 = random.randint(0, len(test_poetry) - 1)
 
@@ -96,6 +108,6 @@ def train_test_set(poetry_type):
 
 
 if __name__ == '__main__':
-    train_poetry, train_label, test_poetry, test_label = train_test_set(1)
+    train_poetry, train_label, test_poetry, test_label = train_test_set(3)
     print(len(train_label))
     print(len(test_poetry))
