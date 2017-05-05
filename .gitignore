@@ -1,8 +1,3 @@
-*/target
-*/project
 /poem
-*/.idea
+/.idea
 *.pyc
-*/data
-thulac_seg_file
-author_time

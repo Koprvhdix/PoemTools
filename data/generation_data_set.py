@@ -1,28 +1,19 @@
-# coding: utf-8
+"""
+Created by Koprvhdix on 17/05/05
+"""
 
-from gensim.models import word2vec
 import os
-from dict_set import author_time_dict, time_mark_dict, chapter_author_dict
-from metrical_poetry import MetricalPoetry
-import numpy as np
-from segment import segment
+from data.metrical_poetry import MetricalPoetry
 
 
-if __name__ == '__main__':
-    poem_path = '/Users/koprvhdix/Projects/PoemTools/poem'
-    poetry_list = list()
-    sentences = list()
-
+def generation_data_set(poetry_type):
+    poem_path = '/Users/koprvhdix/Projects/GraduationProject/poem'
+    data_set = list()
     for chapter in os.listdir(poem_path):
         chapter_path = poem_path + '/' + chapter
 
-        author = chapter_author_dict[chapter]
-        # 将没有年代标识的过滤掉
-        if author not in author_time_dict:
-            continue
-
         for poem in os.listdir(chapter_path):
-            file_open = open(chapter_path + '/' + poem)
+            file_open = open(chapter_path + '/' + poem, encoding="utf-8")
             poem_text = file_open.readlines()
 
             title_end_index = poem_text[0].find('\xa0')
@@ -42,12 +33,18 @@ if __name__ == '__main__':
                 poem_text[0] = poem_text[0][:index + 1]
 
             poetry = MetricalPoetry(poem_text[0])
-            if poetry.is_metrical_poetry:
-                poetry_list.append(poetry)
+            if poetry.is_metrical_poetry and poetry_type == poetry.poetry_type:
+                data_set.append(poem_text[0])
 
-    sentences_list = segment(poetry_list)
+    return data_set
 
-    model = word2vec.Word2Vec(sentences_list, size=200)
-    word2vec.Word2Vec.load()
-    y1 = model.similarity("今日", "明月")
-    print(model["今日"])
+
+if __name__ == '__main__':
+    train_set = generation_data_set(0)
+    print('type 0:', len(train_set))
+    train_set = generation_data_set(1)
+    print('type 1:', len(train_set))
+    train_set = generation_data_set(2)
+    print('type 2:', len(train_set))
+    train_set = generation_data_set(3)
+    print('type 3:', len(train_set))

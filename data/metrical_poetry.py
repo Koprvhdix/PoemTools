@@ -35,7 +35,7 @@ class MetricalPoetry(object):
                     return False
                 punctuation_gate = 0
 
-                if char_number != 7 and char_number != 5 and char_number != self.key_char_number:
+                if (char_number != 7 and char_number != 5) or char_number != self.key_char_number:
                     return False
 
                 sentence_number += 1
@@ -58,6 +58,5 @@ class MetricalPoetry(object):
         return True
 
 if __name__ == '__main__':
-    metrical_poetry_test = MetricalPoetry('红军不怕远征难，万水千山只等闲。五岭逶迤腾细浪，乌蒙磅礴走泥丸。金沙水拍云崖暖，大渡桥横铁索寒。更喜岷山千里雪，三军过后尽开颜。')
+    metrical_poetry_test = MetricalPoetry('雄鹄衔枝来，雌鹄啄泥归。巢成不生子，大义当乖离。江汉水之大，鹄身鸟之微。更无相逢日，且可绕树相随飞。')
     print(metrical_poetry_test.is_metrical_poetry)
-    print(metrical_poetry_test.segmenter_list)
