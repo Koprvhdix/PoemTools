@@ -1,12 +1,11 @@
 import tensorflow as tf
 from tensorflow.contrib import rnn
-from data.load_PingShuiYun import LoadPingShuiYun
 
 
 class ModelGAN(object):
     def __init__(self):
-        self.PingShuiYun = LoadPingShuiYun()
-        self.n_input = self.n_hidden = 512
+        self.n_input = 50
+        self.n_hidden = 512
 
         self.word_num = 4
         self.char_num = 2
@@ -27,7 +26,7 @@ class ModelGAN(object):
                 [self.key_word_encoder_1, self.key_word_encoder_1, self.key_word_encoder_1, self.key_word_encoder_1,
                  self.key_word_encoder_1, self.key_word_encoder_1, self.key_word_encoder_1], 0)
 
-            # output_1 list length 7, each item (?, 512)
+            # output_1 list length 7, each item (?, 100)
             self.output_fw_1 = self.decoder(self.decoder_input_1, 7)
 
             output_fw = list()
@@ -129,10 +128,10 @@ class ModelGAN(object):
             self.discriminator_loss = tf.reduce_mean(
                 -tf.log(self.human_discriminator) - tf.log(1 - self.ai_discriminator))
 
-            self.opt_discriminator = tf.train.GradientDescentOptimizer(0.005).minimize(self.discriminator_loss,
-                                                                                       var_list=self.discriminator_params)
-            self.opt_generator = tf.train.GradientDescentOptimizer(0.005).minimize(self.generate_loss,
-                                                                                   var_list=self.encoder_decoder_params)
+            self.opt_discriminator = tf.train.GradientDescentOptimizer(0.0005).minimize(self.discriminator_loss,
+                                                                                        var_list=self.discriminator_params)
+            self.opt_generator = tf.train.GradientDescentOptimizer(0.00005).minimize(self.generate_loss,
+                                                                                     var_list=self.encoder_decoder_params)
 
     def key_word_encoder(self, x, n_step):
         """
@@ -160,7 +159,10 @@ class ModelGAN(object):
             lstm_bw_cell = rnn.BasicLSTMCell(self.n_hidden, forget_bias=1.0)
             bw_outputs, bw_states = rnn.static_rnn(lstm_bw_cell, bw_x, dtype=tf.float32)
 
-        return fw_outputs[-1], bw_outputs[-1]
+        weight = tf.Variable(tf.random_normal([self.n_hidden, self.n_input]))
+        biase = tf.Variable(tf.random_normal([self.n_input]))
+
+        return tf.matmul(fw_outputs[-1], weight) + biase, tf.matmul(bw_outputs[-1], weight) + biase
 
     def encoder(self, fw_x, bw_x):
         """
@@ -195,7 +197,14 @@ class ModelGAN(object):
         lstm_fw_cell = rnn.BasicLSTMCell(self.n_hidden, forget_bias=1.0)
         output, states = rnn.static_rnn(lstm_fw_cell, x, dtype=tf.float32)
 
-        return output
+        weight = tf.Variable(tf.random_normal([self.n_hidden, self.n_input]))
+        biase = tf.Variable(tf.random_normal([self.n_input]))
+
+        result = list()
+        for i in range(n_step):
+            result.append(tf.matmul(output[i], weight) + biase)
+
+        return result
 
     def discriminator(self, x):
         weight = tf.Variable(tf.random_normal([self.n_hidden, 1]))

@@ -5,6 +5,7 @@ from data.generation_data_set import generation_data_set, generation_train_set
 from gensim.models import word2vec
 from gensim import corpora, models
 from generation.gan_model import ModelGAN
+from data.load_PingShuiYun import LoadPingShuiYun
 import tensorflow as tf
 import logging
 import time
@@ -38,6 +39,7 @@ def embedding_word(model, word_set):
 
 
 if __name__ == '__main__':
+    PingShuiYun = LoadPingShuiYun()
     all_poetry_set, all_segment_set = generation_data_set(1)
     train_poetry_set = generation_train_set(1)
 
@@ -49,7 +51,7 @@ if __name__ == '__main__':
                 lda_set.append(all_segment_set[j])
                 break
 
-    model = word2vec.Word2Vec(all_poetry_set, size=512, min_count=1)
+    model = word2vec.Word2Vec(train_poetry_set, size=50, min_count=1)
 
     dictionary = corpora.Dictionary(lda_set)
     corpus = [dictionary.doc2bow(text) for text in lda_set]
@@ -80,14 +82,14 @@ if __name__ == '__main__':
         key_word_embedding.append(embedding_word(model, poetry_key_word[index]))
 
     tone = [
-        ['A', 'P', 'A', 'Z', 'Z', 'P', 'P', 'A', 'Z', 'P', 'P', 'Z', 'Z', 'P', 'A', 'Z', 'A', 'P', 'P', 'Z', 'Z',
-         'A', 'P', 'A', 'Z', 'Z', 'P', 'P'],
-        ['A', 'P', 'A', 'Z', 'P', 'P', 'Z', 'A', 'Z', 'P', 'P', 'Z', 'Z', 'P', 'A', 'Z', 'A', 'P', 'P', 'Z', 'Z',
-         'A', 'P', 'A', 'Z', 'Z', 'P', 'P'],
-        ['A', 'Z', 'P', 'P', 'Z', 'Z', 'P', 'A', 'P', 'A', 'Z', 'Z', 'P', 'P', 'A', 'P', 'A', 'Z', 'P', 'P', 'Z',
-         'A', 'Z', 'P', 'P', 'Z', 'Z', 'P'],
-        ['A', 'Z', 'A', 'P', 'P', 'Z', 'Z', 'A', 'A', 'Z', 'Z', 'Z', 'P', 'P', 'A', 'P', 'A', 'Z', 'P', 'P', 'Z',
-         'A', 'Z', 'P', 'P', 'Z', 'Z', 'P']]
+        [['A', 'P', 'A', 'Z', 'Z', 'P', 'P'], ['A', 'Z', 'P', 'P', 'Z', 'Z', 'P'], ['A', 'Z', 'A', 'P', 'P', 'Z', 'Z'],
+         ['A', 'P', 'A', 'Z', 'Z', 'P', 'P']],
+        [['A', 'P', 'A', 'Z', 'P', 'P', 'Z'], ['A', 'Z', 'P', 'P', 'Z', 'Z', 'P'], ['A', 'Z', 'A', 'P', 'P', 'Z', 'Z'],
+         ['A', 'P', 'A', 'Z', 'Z', 'P', 'P']],
+        [['A', 'Z', 'P', 'P', 'Z', 'Z', 'P'], ['A', 'P', 'A', 'Z', 'Z', 'P', 'P'], ['A', 'P', 'A', 'Z', 'P', 'P', 'Z'],
+         ['A', 'Z', 'P', 'P', 'Z', 'Z', 'P']],
+        [['A', 'Z', 'A', 'P', 'P', 'Z', 'Z'], ['A', 'A', 'Z', 'Z', 'Z', 'P', 'P'], ['A', 'P', 'A', 'Z', 'P', 'P', 'Z'],
+         ['A', 'Z', 'P', 'P', 'Z', 'Z', 'P']]]
 
     model_gan = ModelGAN()
 
@@ -99,9 +101,12 @@ if __name__ == '__main__':
 
         poetry_embedding = embedding_poetry(model, train_poetry_set)
 
+        discriminator_loss_list = list()
         for iter_num in range(10000):
             print("iter_num ", iter_num)
             step = 1
+            discriminator_loss_before = discriminator_loss_list
+            discriminator_loss = list()
             while step * batch_size <= 60:
                 session.run(model_gan.opt_generator, feed_dict={
                     model_gan.key_word_list: key_word_embedding[(step - 1) * batch_size:step * batch_size],
@@ -110,21 +115,49 @@ if __name__ == '__main__':
                 discriminator_loss = session.run(model_gan.discriminator_loss, feed_dict={
                     model_gan.key_word_list: key_word_embedding[(step - 1) * batch_size: step * batch_size],
                     model_gan.poetry_set: poetry_embedding[(step - 1) * batch_size:step * batch_size]})
+                discriminator_loss_list.append(discriminator_loss)
                 print("discriminator_loss: ", discriminator_loss)
 
-                if discriminator_loss > 1:
-                    session.run(model_gan.opt_discriminator, feed_dict={
-                        model_gan.key_word_list: key_word_embedding[(step - 1) * batch_size:step * batch_size],
-                        model_gan.poetry_set: poetry_embedding[(step - 1) * batch_size:step * batch_size]})
-                step += 1
-
-                if iter_num % 10 == 9:
+                if discriminator_loss > 0.7:
                     poetry = session.run(model_gan.output, feed_dict={
                         model_gan.key_word_list: key_word_embedding[(step - 1) * batch_size:step * batch_size]})
 
                     for poetry_index in range(batch_size):
+                        poem_str = str()
                         for sentence_index in range(4):
-                            pass
+                            character1_list = model.similar_by_vector(poetry[poetry_index][sentence_index][0], topn=100)
+                            character2_list = model.similar_by_vector(poetry[poetry_index][sentence_index][1], topn=100)
+
+                            character3_list = model.similar_by_vector(poetry[poetry_index][sentence_index][2], topn=100)
+                            character4_list = model.similar_by_vector(poetry[poetry_index][sentence_index][3], topn=100)
+
+                            character5_list = model.similar_by_vector(poetry[poetry_index][sentence_index][4], topn=100)
+                            character6_list = model.similar_by_vector(poetry[poetry_index][sentence_index][5], topn=100)
+                            character7_list = model.similar_by_vector(poetry[poetry_index][sentence_index][6], topn=100)
+
+                            character_list = [[], [], [], [], [], [], []]
+                            for i in range(100):
+                                character_list[0].append(character1_list[i][0])
+                                character_list[1].append(character2_list[i][0])
+                                character_list[2].append(character3_list[i][0])
+                                character_list[3].append(character4_list[i][0])
+                                character_list[4].append(character5_list[i][0])
+                                character_list[5].append(character6_list[i][0])
+                                character_list[6].append(character7_list[i][0])
+
+                            for i in range(7):
+                                print(character_list[i])
+
+                            if sentence_index % 2 == 0:
+                                poem_str += '，'
+                            else:
+                                poem_str += '。'
+
+                    session.run(model_gan.opt_discriminator, feed_dict={
+                        model_gan.key_word_list: key_word_embedding[(step - 1) * batch_size:step * batch_size],
+                        model_gan.poetry_set: poetry_embedding[(step - 1) * batch_size:step * batch_size]})
+
+                step += 1
 
             if iter_num % 10 == 9:
-                time.sleep(20)
+                time.sleep(30)
