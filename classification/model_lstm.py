@@ -27,6 +27,6 @@ class ModelLSTM(object):
 
         self.output = tf.matmul(outputs[-1], weights) + biases
         self.cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self.output, labels=self.label))
-        self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.cost)
+        self.optimizer = tf.train.GradientDescentOptimizer(learning_rate=self.learning_rate).minimize(self.cost)
         correct_pred = tf.equal(tf.argmax(self.output, 1), tf.argmax(self.label, 1))
         self.accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
