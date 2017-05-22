@@ -42,6 +42,7 @@ if __name__ == '__main__':
     PingShuiYun = LoadPingShuiYun()
     all_poetry_set, all_segment_set = generation_data_set(1)
     train_poetry_set = generation_train_set(1)
+    print(train_poetry_set)
 
     # 获取准确分词
     lda_set = list()
@@ -118,10 +119,10 @@ if __name__ == '__main__':
                 discriminator_loss_list.append(discriminator_loss)
                 print("discriminator_loss: ", discriminator_loss)
 
-                if discriminator_loss > 0.7:
+                if discriminator_loss > 0.7 or iter_num % 10 == 9:
+                    print(str(iter_num) + " file_output")
                     poetry = session.run(model_gan.output, feed_dict={
                         model_gan.key_word_list: key_word_embedding[(step - 1) * batch_size:step * batch_size]})
-
                     for poetry_index in range(batch_size):
                         poem_str = str()
                         for sentence_index in range(4):
@@ -145,17 +146,17 @@ if __name__ == '__main__':
                                 character_list[5].append(character6_list[i][0])
                                 character_list[6].append(character7_list[i][0])
 
-                            for i in range(7):
-                                print(character_list[i])
+                            poem_str += str(character_list)
+                            poem_str += '\n'
 
-                            if sentence_index % 2 == 0:
-                                poem_str += '，'
-                            else:
-                                poem_str += '。'
+                        with open("file_" + str(iter_num) + "_" + str(step) + "_" + str(poetry_index), 'w', encoding='utf-8') as file_open:
+                            file_open.write(poem_str)
 
+                if discriminator_loss > 0.7:
                     session.run(model_gan.opt_discriminator, feed_dict={
                         model_gan.key_word_list: key_word_embedding[(step - 1) * batch_size:step * batch_size],
                         model_gan.poetry_set: poetry_embedding[(step - 1) * batch_size:step * batch_size]})
+                    print("discriminator update")
 
                 step += 1
 
